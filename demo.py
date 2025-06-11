@@ -1,6 +1,19 @@
 # down.py
 
 import sys
+import re
+from langchain_community.document_loaders import UnstructuredWordDocumentLoader
+from langchain_ollama import OllamaEmbeddings, ChatOllama
+from langchain.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+def callCodeLLama(issue_title,issue_body):
+    with open('./repomix-output.md', 'r') as file:
+           markdown_content = file.read()
+           print(markdown_content)
 
 def main():
     if len(sys.argv) != 3:
