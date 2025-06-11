@@ -19,10 +19,10 @@ def main():
     if len(sys.argv) != 3:
         print("Usage: python down.py <issue_title> <issue_body>")
         sys.exit(1)
-
+    
     issue_title = sys.argv[1]
     issue_body = sys.argv[2]
-
+    callCodeLLama(issue_title,issue_body)
     result = (
         "### 🔍 Issue Information Extracted by `down.py`:\n\n"
         f"**Title:** {issue_title}\n\n"
