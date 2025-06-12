@@ -26,7 +26,7 @@ def callCodeLLama(issue_title, issue_body):
 
     escaped_markdown_content = markdown_content.replace("{", "{{").replace("}", "}}")
 
-    initial_pr = (
+    '''initial_pr = (
         "You are an AI assistant who strictly answers ONLY from this document.\n\n\n"
         + escaped_markdown_content
         + "\n\n\n"
@@ -39,7 +39,27 @@ def callCodeLLama(issue_title, issue_body):
         
         DO NOT USE ANY EXTERNAL KNOWLEDGE OR INFORMATION. STRICTLY USE THE DOCUMENT PROVIDED ABOVE.
         """
-    )
+    )'''
+
+    initial_pr = """You are an AI assistant who strictly answers ONLY from this document.
+
+    CRITICAL INSTRUCTION: You MUST categorize every response as exactly one of: Bug, Enhancement, Documentation, Question.
+    
+    """ + "\n\n\n"+escaped_markdown_content + """\n\n\n""" +"""
+    
+    Issue:
+    {issue}
+    
+    Provide your response in this exact format:
+    
+    1. **Root Cause Analysis:** [Your analysis]
+    2. **Code Fix:** [Your fix based on the document]
+    3. **Side Effects/Considerations:** [Your considerations if any]
+    4. **Issue Category:** [REQUIRED - Must be exactly one of: Bug, Enhancement, Documentation, Question]
+    
+    FINAL REMINDER: Do not forget to specify the issue category. This is mandatory.
+    
+    DO NOT USE ANY EXTERNAL KNOWLEDGE OR INFORMATION. STRICTLY USE THE DOCUMENT PROVIDED ABOVE."""
 
     prompt = ChatPromptTemplate.from_template(initial_pr)
 
