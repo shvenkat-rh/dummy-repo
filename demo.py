@@ -100,7 +100,7 @@ def main():
 
     response = callCodeLLama(title, body)
     result = (
-        "### 🔍 Issue Information Extracted by `down.py`:\n\n"
+        "### Root Cause Analysis and Triage by AnsibleLLM:\n\n"
         f"**Title:** {title}\n\n"
         f"**Body:** {body}\n\n"
         f"**Response:** {response}\n"
