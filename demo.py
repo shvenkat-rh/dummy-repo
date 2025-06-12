@@ -113,10 +113,10 @@ def main():
         print("Usage: python down.py <issue_title> <issue_body>")
         sys.exit(1)
         
-    with open('issue_title.txt', 'r') as f:
+    with open('./issue_title.txt', 'r') as f:
         title = f.read()
 
-    with open('issue_body.txt', 'r') as f:
+    with open('./issue_body.txt', 'r') as f:
         body = f.read()
 
     response=callCodeLLama(title,body)
