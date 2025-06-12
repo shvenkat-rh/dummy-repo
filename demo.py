@@ -91,11 +91,11 @@ def main():
     title_file = sys.argv[1]
     body_file = sys.argv[2]
 
-    with open(title_file, 'r') as f:
-        title = f.read()
+    #with open(title_file, 'r') as f:
+        #title = f.read()
 
-    with open(body_file, 'r') as f:
-        body = f.read()
+    #with open(body_file, 'r') as f:
+        #body = f.read()
 
     response = callCodeLLama(title, body)
     result = (
