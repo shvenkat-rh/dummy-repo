@@ -1,6 +1,5 @@
-# down.py
-
 import sys
+import os
 import re
 from langchain_community.document_loaders import UnstructuredWordDocumentLoader
 from langchain_ollama import OllamaEmbeddings, ChatOllama
@@ -10,14 +9,9 @@ from langchain_core.runnables import RunnablePassthrough
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import nltk
-import os
 
 def callCodeLLama(issue_title, issue_body):
-    # Read repomix output from the same directory
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    repomix_file = os.path.join(base_path, 'repomix-output.md')
-    
-    with open(repomix_file, 'r') as file:
+    with open('./repomix-output.md', 'r') as file:
         markdown_content = file.read()
 
     nltk.download('punkt')
@@ -39,9 +33,10 @@ def callCodeLLama(issue_title, issue_body):
         + """
         Issue:
         {issue}
-
-        Please provide Root cause analysis of the issue. Any Specific code fix based on the code given in the document. Also any potential side effects or considerations.
-
+        
+        Please provide Root cause analysis of the issue. Any Specific code fix based on the code given in the document.
+        Also any potential side effects or considerations.
+        
         DO NOT USE ANY EXTERNAL KNOWLEDGE OR INFORMATION. STRICTLY USE THE DOCUMENT PROVIDED ABOVE.
         """
     )
@@ -65,16 +60,15 @@ def callCodeLLama(issue_title, issue_body):
 
     duplicates = set()
     if embedded_issues:
-        duplicate_threshold = 0.85
-        num_issues = len(issues)
-        for i in range(num_issues):
-            for j in range(i + 1, num_issues):
+        threshold = 0.85
+        for i in range(len(issues)):
+            for j in range(i + 1, len(issues)):
                 try:
                     sim = cosine_similarity([embedded_issues[i]], [embedded_issues[j]])[0][0]
-                    if sim > duplicate_threshold:
+                    if sim > threshold:
                         duplicates.add(j)
                 except Exception as e:
-                    print(f"Error calculating similarity between issues {i+1} and {j+1}: {e}")
+                    print(f"Error calculating similarity: {e}")
 
     unique_issues = [issue for idx, issue in enumerate(issues) if idx not in duplicates]
     responses = []
@@ -84,27 +78,34 @@ def callCodeLLama(issue_title, issue_body):
             response = chain.invoke(input=issue_text)
             responses.append(response)
         except Exception as e:
-            print(f"Failed analysis: {e}")
-            continue
+            responses.append(f"Error analyzing issue: {e}")
 
-    return str(responses[0]) if responses else "No response"
+    return responses[0] if responses else "No response"
+
 
 def main():
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(base_path, 'issue_title.txt'), 'r') as f:
+    if len(sys.argv) != 3:
+        print("Usage: python down.py <issue_title_file> <issue_body_file>")
+        sys.exit(1)
+
+    title_file = sys.argv[1]
+    body_file = sys.argv[2]
+
+    with open(title_file, 'r') as f:
         title = f.read()
 
-    with open(os.path.join(base_path, 'issue_body.txt'), 'r') as f:
+    with open(body_file, 'r') as f:
         body = f.read()
 
     response = callCodeLLama(title, body)
     result = (
         "### 🔍 Issue Information Extracted by `down.py`:\n\n"
         f"**Title:** {title}\n\n"
-        f"**Body:** {body}\n"
+        f"**Body:** {body}\n\n"
         f"**Response:** {response}\n"
     )
     print(result)
+
 
 if __name__ == "__main__":
     main()
