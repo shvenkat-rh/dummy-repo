@@ -14,7 +14,7 @@ import nltk
 def callCodeLLama(issue_title,issue_body):
     with open('./repomix-output.md', 'r') as file:
            markdown_content = file.read()
-           print(markdown_content)
+
     nltk.download('punkt')
     nltk.download('averaged_perceptron_tagger')
     ititle=issue_title.strip()
@@ -59,10 +59,8 @@ def callCodeLLama(issue_title,issue_body):
     model="nomic-embed-text:latest")
 
     # === Step 6: Embed All Issues for Similarity Analysis ===
-    print("Generating embeddings for all issues...")
     try:
         embedded_issues = embedding_model.embed_documents(issues)
-        print(f"Successfully generated embeddings for {len(embedded_issues)} issues.")
     except Exception as e:
         print(f"Error generating embeddings: {e}")
         print("Proceeding without duplicate detection...")
@@ -73,78 +71,59 @@ def callCodeLLama(issue_title,issue_body):
         duplicate_threshold = 0.85  # Adjust similarity threshold as needed
         num_issues = len(issues)
         
-        print("Analyzing for duplicate issues...")
         for i in range(num_issues):
             for j in range(i + 1, num_issues):
                 try:
                     sim = cosine_similarity([embedded_issues[i]], [embedded_issues[j]])[0][0]
                     if sim > duplicate_threshold:
                         duplicates.add(j)
-                        print(f"Potential duplicate found: Issue {i+1} and Issue {j+1} (similarity: {sim:.3f})")
                 except Exception as e:
                     print(f"Error calculating similarity between issues {i+1} and {j+1}: {e}")
-        
-        print(f"Identified {len(duplicates)} likely duplicate issues.")
-    else:
-        print("Skipping duplicate detection due to embedding issues.")
 
     # === Step 8: Filter Out Duplicates ===
     unique_issues = [issue for idx, issue in enumerate(issues) if idx not in duplicates]
-    print(f"Processing {len(unique_issues)} unique issues (filtered {len(duplicates)} duplicates).")
     analyzed_issues = []
     responses = []
     failed_analyses = []
     # === Step 9: Analyze Each Unique Issue with codellama ===
-    print("\n" + "="*60)
-    print("STARTING ISSUE ANALYSIS WITH codellama")
-    print("="*60)
     
     for idx, issue_text in enumerate(unique_issues):
         original_idx = [i for i, issue in enumerate(issues) if issue == issue_text][0]
         
-        print(f"\n{'='*50}")
-        print(f"ANALYZING ISSUE {original_idx + 1} of {len(issues)}")
-        print(f"{'='*50}")
         
         try:
             # Invoke the codellama analysis
             response = chain.invoke(input=issue_text)
             analyzed_issues.append(issue_text)
             responses.append(response)
-            print(f"\n🔍 codellama ANALYSIS:")
-            print("-" * 40)
-            print(response)
             
         except Exception as e:
-            print(f"❌ Error analyzing issue {original_idx + 1}: {e}")
             failed_analyses.append({
                 'issue_idx': original_idx + 1,
                 'issue_text': issue_text,
                 'error': str(e)
             })
-            print("Skipping to next issue...")
             continue
         
-        print(f"\n{'='*50}")
-        print(f"COMPLETED ISSUE {original_idx + 1}")
-        print(f"{'='*50}")
-    
-    print(f"\n🎉 Analysis complete! Processed {len(unique_issues)} unique issues.")
-    return str(response)
+    return str(responses[0]) if len(responses)>=1 else "No response"
 
 
 def main():
     if len(sys.argv) != 3:
         print("Usage: python down.py <issue_title> <issue_body>")
         sys.exit(1)
-    
-    issue_title = sys.argv[1]
-    issue_body = sys.argv[2]
-    response=callCodeLLama(issue_title,issue_body)
+        
+    with open('issue_title.txt', 'r') as f:
+        title = f.read()
+
+    with open('issue_body.txt', 'r') as f:
+        body = f.read()
+
+    response=callCodeLLama(title,body)
     result = (
         "### 🔍 Issue Information Extracted by `down.py`:\n\n"
-        f"**Title:** {issue_title}\n\n"
-        f"**Body:** {issue_body}\n"
+        f"**Title:** {title}\n\n"
+        f"**Body:** {body}\n"
         f"**Response:** {response}\n"
     )
     print(result)
