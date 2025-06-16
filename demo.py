@@ -111,7 +111,7 @@ def main():
     issue_title = sys.argv[1]
     issue_body = sys.argv[2]
     
-    response = callCodeLLama(title, body)
+    response = callCodeLLama(issue_title, issue_body)
     result = (
         "### Root Cause Analysis and Triage by AnsibleLLM:\n\n"
         f"**Response:** {response}\n"
