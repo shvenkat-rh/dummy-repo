@@ -108,16 +108,9 @@ def main():
         print("Usage: python down.py <issue_title_file> <issue_body_file>")
         sys.exit(1)
 
-    title_file = sys.argv[1]
-    body_file = sys.argv[2]
-    title=str(title_file)
-    body=str(body_file)
-    #with open(title_file, 'r') as f:
-        #title = f.read()
-
-    #with open(body_file, 'r') as f:
-        #body = f.read()
-
+    issue_title = sys.argv[1]
+    issue_body = sys.argv[2]
+    
     response = callCodeLLama(title, body)
     result = (
         "### Root Cause Analysis and Triage by AnsibleLLM:\n\n"
