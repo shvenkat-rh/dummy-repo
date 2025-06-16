@@ -121,8 +121,6 @@ def main():
     response = callCodeLLama(title, body)
     result = (
         "### Root Cause Analysis and Triage by AnsibleLLM:\n\n"
-        f"**Title:** {title}\n\n"
-        f"**Body:** {body}\n\n"
         f"**Response:** {response}\n"
     )
     print(result)
