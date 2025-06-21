@@ -10,6 +10,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import nltk
 
+def sanitize_issue_text(text):
+    text = re.sub(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', '[REDACTED_IP]', text)
+    text = re.sub(r'\b[\w\.-]+@[\w\.-]+\.\w+\b', '[REDACTED_EMAIL]', text)
+    text = re.sub(r'(?i)(api[_-]?key|token|secret)[\'":\s]*[a-zA-Z0-9-_]{10,}', '[REDACTED_SECRET]', text)
+    return text
+
+
 def callCodeLLama(issue_title, issue_body):
     with open('./repomix-output.md', 'r') as file:
         markdown_content = file.read()
@@ -17,8 +24,8 @@ def callCodeLLama(issue_title, issue_body):
     nltk.download('punkt')
     nltk.download('averaged_perceptron_tagger')
 
-    ititle = issue_title.strip()
-    ibody = issue_body.strip()
+    ititle = str(sanitize_issue_text(issue_title).strip())
+    ibody = str(sanitize_issue_text(issue_body).strip())
     full_issue_text = f"{ititle}\n{ibody}"
     issues = [full_issue_text]
 
@@ -56,6 +63,13 @@ def callCodeLLama(issue_title, issue_body):
     2. **Code Fix:** [Your fix based on the document]
     3. **Side Effects/Considerations:** [Your considerations if any]
     4. **Issue Category:** [REQUIRED - Must be exactly one of: Bug, Enhancement, Documentation, Question]
+
+    ONLY respond if the issue has both:
+        - A clear and specific description of the problem
+        - Enough technical detail to determine the cause or solution
+
+        If the issue is vague, missing context, or unclear in any way, respond exactly with:
+        "Not Clear: The issue lacks enough detail to determine a root cause or solution."
     
     FINAL REMINDER: Do not forget to specify the issue category. This is mandatory.
     
