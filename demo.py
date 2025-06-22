@@ -60,7 +60,7 @@ def callCodeLLama(issue_title, issue_body):
     Provide your response in this exact format:
     
     1. **Root Cause Analysis:** [Your analysis]
-    2. **Code Fix:** [Your fix based on the document. Write a sample code block if it is applicable to the issue]
+    2. **Code Fix:** [Your fix based on the document]
     3. **Side Effects/Considerations:** [Your considerations if any]
     4. **Issue Category:** [REQUIRED - Must be exactly one of: Bug, Enhancement, Documentation, Question]
 
